@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "osu! Beatmap Listing Pagination",
+  "version": "1.0.0",
+  "description": "Replaces the infinite scroll on osu.ppy.sh/beatmapsets with numbered pages that survive navigation.",
+  "content_scripts": [
+    {
+      "matches": ["https://osu.ppy.sh/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

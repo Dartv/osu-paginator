@@ -1,0 +1,351 @@
+/* Hide osu!'s own infinite-scroll list while ours is shown. */
+html.osp-active .beatmapsets {
+  display: none !important;
+}
+
+#osp-root {
+  display: none;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 20px 40px;
+  color: #fff;
+  font-family: inherit;
+}
+
+html.osp-active #osp-root {
+  display: block;
+}
+
+#osp-root *,
+#osp-root *::before,
+#osp-root *::after {
+  box-sizing: border-box;
+}
+
+#osp-root a {
+  color: inherit;
+  text-decoration: none;
+}
+
+#osp-root.osp-loading .osp-grid {
+  opacity: 0.4;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+
+/* Date filter */
+
+.osp-dates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: hsl(205, 10%, 15%);
+  font-size: 13px;
+}
+
+.osp-dates__group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.osp-dates__label {
+  min-width: 70px;
+  font-weight: 700;
+  color: hsl(205, 10%, 70%);
+}
+
+.osp-dates__group--set .osp-dates__label {
+  color: hsl(333, 100%, 70%);
+}
+
+.osp-dates input,
+.osp-dates select {
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid hsl(205, 10%, 30%);
+  border-radius: 15px;
+  background: hsl(205, 10%, 12%);
+  color: #fff;
+  font: inherit;
+  color-scheme: dark;
+}
+
+.osp-dates__clear {
+  height: 30px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: none;
+  border-radius: 15px;
+  background: hsl(205, 10%, 22%);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.osp-dates__clear:hover {
+  background: hsl(205, 10%, 30%);
+}
+
+.osp-notice {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: hsl(40, 60%, 22%);
+  font-size: 13px;
+}
+
+.osp-notice p {
+  margin: 2px 0;
+}
+
+.osp-status {
+  padding: 30px;
+  text-align: center;
+  color: hsl(205, 10%, 70%);
+}
+
+.osp-retry {
+  margin-left: 8px;
+}
+
+/* Pager */
+
+.osp-pager {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 12px 0;
+}
+
+.osp-pager__btn,
+.osp-retry {
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 16px;
+  background: hsl(205, 10%, 22%);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.osp-pager__btn:hover:not(:disabled),
+.osp-retry:hover {
+  background: hsl(205, 10%, 30%);
+}
+
+.osp-pager__btn:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.osp-pager__btn--current:disabled {
+  opacity: 1;
+  background: hsl(333, 100%, 65%);
+  font-weight: 700;
+}
+
+.osp-pager__gap {
+  color: hsl(205, 10%, 60%);
+}
+
+.osp-pager__jump {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 0 12px;
+}
+
+.osp-pager__jump input {
+  width: 64px;
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid hsl(205, 10%, 30%);
+  border-radius: 16px;
+  background: hsl(205, 10%, 12%);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  text-align: center;
+}
+
+.osp-pager__count {
+  font-size: 13px;
+  color: hsl(205, 10%, 70%);
+}
+
+/* Cards */
+
+.osp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 420px) {
+  .osp-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.osp-card {
+  display: flex;
+  height: 110px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: hsl(205, 10%, 18%);
+}
+
+.osp-card:hover {
+  background: hsl(205, 10%, 22%);
+}
+
+.osp-card__cover {
+  position: relative;
+  flex: 0 0 110px;
+  padding: 0;
+  border: none;
+  background: hsl(205, 10%, 12%) center / cover no-repeat;
+  cursor: pointer;
+}
+
+.osp-card__play {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 26px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.osp-card__cover:hover .osp-card__play,
+.osp-card__cover--playing .osp-card__play {
+  opacity: 1;
+}
+
+.osp-card__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 3px;
+  background: hsl(333, 100%, 65%);
+}
+
+.osp-status-badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #b3ff66;
+}
+
+.osp-status-badge--loved { color: #ff66ab; }
+.osp-status-badge--qualified,
+.osp-status-badge--approved { color: #66ccff; }
+.osp-status-badge--pending,
+.osp-status-badge--wip { color: #ffd966; }
+.osp-status-badge--graveyard { color: #aaa; }
+
+.osp-card__body {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+}
+
+.osp-card__title,
+.osp-card__artist,
+.osp-card__mapper {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.osp-card__title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.osp-card__title:hover,
+.osp-card__mapper a:hover {
+  text-decoration: underline;
+}
+
+.osp-card__artist,
+.osp-card__mapper {
+  color: hsl(205, 10%, 75%);
+}
+
+.osp-card__mapper a {
+  color: hsl(200, 100%, 75%) !important;
+}
+
+.osp-card__stats {
+  display: flex;
+  gap: 12px;
+  color: hsl(205, 10%, 75%);
+}
+
+.osp-card__diffs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px;
+  margin-top: auto;
+}
+
+.osp-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.osp-more {
+  font-size: 11px;
+  color: hsl(205, 10%, 70%);
+}
+
+.osp-card__actions {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 34px;
+  background: hsl(205, 10%, 14%);
+}
+
+.osp-card__download {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: hsl(205, 10%, 80%);
+  font-size: 14px;
+}
+
+.osp-card__download:hover {
+  color: hsl(333, 100%, 70%) !important;
+}
