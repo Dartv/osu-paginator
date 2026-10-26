@@ -4,7 +4,7 @@ Replaces the infinite scroll on https://osu.ppy.sh/beatmapsets with numbered pag
 
 - The page number lives in the URL (`?page=N`), so going Back from a beatmap returns you to the same page.
 - The last page you were on is remembered per search (sort + filters), so opening the listing again picks up where you left off.
-- Date filter bar: pick a month range (or a whole year) for **Ranked**, **Submitted** (osu!'s `created`/`submitted`) and **Updated**. It writes the matching `ranked>=2010-08 ranked<2010-11` terms into the search box for you. The "to" month is inclusive.
+- Date filter bar for **Ranked**, **Submitted** (osu!'s `created`/`submitted`) and **Updated**. Each opens a calendar: click the start day, then the end day. You can also type dates, jump by month/year, or use presets (whole month, whole year, last 30 days, last 12 months). It writes the matching `ranked>=2010-08-01 ranked<2010-11-01` terms into the search box for you; both picked days are included.
 - Click a thumbnail to play the song preview; click the title to open the beatmap.
 
 ## Install

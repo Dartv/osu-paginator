@@ -16,7 +16,9 @@
   let shown = null; // "query|page" currently shown or loading
   let requestId = 0;
   let playingId = null;
-  let dateTimer = null;
+  let picker = null;
+  let pickerField = null; // date field the open picker edits
+  let dateRanges = {}; // field -> { from, to } as inclusive "YYYY-MM-DD" days
 
   // osu!'s star rating colour spectrum
   const DIFF_STOPS = [
@@ -109,19 +111,15 @@
 
   const normaliseField = (f) => (f.toLowerCase() === 'submitted' ? 'created' : f.toLowerCase());
 
-  function shiftMonth(ym, delta) {
-    const [y, m] = ym.split('-').map(Number);
-    const d = new Date(y, m - 1 + delta, 1);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  // First and last day of the period a search value names: "2010", "2010-8" or "2010-08-15".
+  function periodBounds(value) {
+    const [y, m, d] = value.split('-').map(Number);
+    if (d) return [OspDate.ymd(y, m - 1, d), OspDate.ymd(y, m - 1, d)];
+    if (m) return [OspDate.ymd(y, m - 1, 1), OspDate.ymd(y, m, 0)];
+    return [OspDate.ymd(y, 0, 1), OspDate.ymd(y, 11, 31)];
   }
 
-  // "2010" / "2010-8" / "2010-08-15" -> "2010-08"; year-only becomes January or December.
-  function toMonth(value, endOfYear) {
-    const [y, m] = value.split('-');
-    return `${y}-${String(m || (endOfYear ? 12 : 1)).padStart(2, '0')}`;
-  }
-
-  // Reads each date field's range out of a search query as inclusive months.
+  // Reads each date field's range out of a search query as inclusive days.
   function parseDates(q) {
     const ranges = {};
     for (const field of Object.keys(DATE_FIELDS)) ranges[field] = { from: '', to: '' };
@@ -130,10 +128,12 @@
       if (!match) continue;
       const range = ranges[normaliseField(match[1])];
       const [, , op, value] = match;
-      if (op === '>=' || op === '>') range.from = toMonth(value, false);
-      else if (op === '<=') range.to = toMonth(value, true);
-      else if (op === '<') range.to = shiftMonth(toMonth(value, false), -1);
-      else if (op !== '!=') range.from = range.to = toMonth(value, false);
+      const [first, last] = periodBounds(value);
+      if (op === '>=') range.from = first;
+      else if (op === '>') range.from = OspDate.addDays(last, 1);
+      else if (op === '<=') range.to = last;
+      else if (op === '<') range.to = OspDate.addDays(first, -1);
+      else if (op !== '!=') [range.from, range.to] = [first, last];
     }
     return ranges;
   }
@@ -142,7 +142,8 @@
     const tokens = q.split(/\s+/).filter((token) => token && !DATE_TOKEN.test(token));
     for (const [field, { from, to }] of Object.entries(ranges)) {
       if (from) tokens.push(`${field}>=${from}`);
-      if (to) tokens.push(`${field}<${shiftMonth(to, 1)}`);
+      // "<" the next day is inclusive of `to` however osu! reads "<=" on a day.
+      if (to) tokens.push(`${field}<${OspDate.addDays(to, 1)}`);
     }
     return tokens.join(' ');
   }
@@ -168,46 +169,42 @@
   }
 
   function applyDates() {
-    const ranges = {};
-    root.querySelectorAll('.osp-dates__group').forEach((group) => {
-      let from = group.querySelector('.osp-dates__from').value;
-      let to = group.querySelector('.osp-dates__to').value;
-      if (from && to && from > to) [from, to] = [to, from];
-      ranges[group.dataset.field] = { from, to };
-    });
     const q = (new URLSearchParams(location.search).get('q') || '').trim();
-    const next = buildQuery(q, ranges);
+    const next = buildQuery(q, dateRanges);
     if (next !== q) setSearchQuery(next);
   }
 
-  function syncDates(query) {
-    const controls = root.querySelector('.osp-dates');
-    if (controls.contains(document.activeElement)) return;
-    const ranges = parseDates(new URLSearchParams(query).get('q') || '');
-    controls.querySelectorAll('.osp-dates__group').forEach((group) => {
-      const { from, to } = ranges[group.dataset.field];
-      group.querySelector('.osp-dates__from').value = from;
-      group.querySelector('.osp-dates__to').value = to;
-      group.classList.toggle('osp-dates__group--set', Boolean(from || to));
+  function rangeLabel({ from, to }) {
+    if (from && to) return from === to ? OspDate.format(from) : `${OspDate.format(from)} – ${OspDate.format(to)}`;
+    if (from) return `since ${OspDate.format(from)}`;
+    if (to) return `until ${OspDate.format(to)}`;
+    return 'any time';
+  }
+
+  function renderDateChips() {
+    root.querySelectorAll('.osp-dates__chip').forEach((chip) => {
+      const range = dateRanges[chip.dataset.field];
+      chip.classList.toggle('osp-dates__chip--set', Boolean(range.from || range.to));
+      chip.querySelector('.osp-dates__value').textContent = rangeLabel(range);
     });
   }
 
+  function syncDates(query) {
+    if (picker.isOpen) return;
+    dateRanges = parseDates(new URLSearchParams(query).get('q') || '');
+    renderDateChips();
+  }
+
   function datesHtml() {
-    let years = '';
-    for (let y = new Date().getFullYear(); y >= FIRST_YEAR; y--) years += `<option value="${y}">${y}</option>`;
-    const groups = Object.entries(DATE_FIELDS).map(([field, label]) => `
-      <div class="osp-dates__group" data-field="${field}">
+    const chips = Object.entries(DATE_FIELDS).map(([field, label]) => `
+      <button type="button" class="osp-dates__chip" data-field="${field}">
         <span class="osp-dates__label">${label}</span>
-        <input type="month" class="osp-dates__from" aria-label="${label} from">
-        <span>–</span>
-        <input type="month" class="osp-dates__to" aria-label="${label} to">
-        <select class="osp-dates__year" aria-label="${label} in a whole year">
-          <option value="">year</option>${years}
-        </select>
-      </div>`).join('');
+        <span class="osp-dates__value">any time</span>
+        <span class="osp-dates__caret">▾</span>
+      </button>`).join('');
     return `
       <div class="osp-dates">
-        ${groups}
+        ${chips}
         <button type="button" class="osp-dates__clear">Clear dates</button>
       </div>`;
   }
@@ -237,29 +234,32 @@
         shown = null;
         tick();
       }
+      const chip = e.target.closest('.osp-dates__chip');
+      if (chip) {
+        const reopen = !(picker.isOpen && pickerField === chip.dataset.field);
+        picker.close(true);
+        if (reopen) {
+          pickerField = chip.dataset.field;
+          picker.open(chip, dateRanges[pickerField]);
+        }
+      }
       if (e.target.closest('.osp-dates__clear')) {
-        el.querySelectorAll('.osp-dates input').forEach((input) => { input.value = ''; });
-        el.querySelectorAll('.osp-dates__group--set').forEach((g) => g.classList.remove('osp-dates__group--set'));
-        clearTimeout(dateTimer);
+        picker.close(false);
+        for (const field of Object.keys(dateRanges)) dateRanges[field] = { from: '', to: '' };
+        renderDateChips();
         applyDates();
       }
     });
 
-    el.addEventListener('change', (e) => {
-      const group = e.target.closest('.osp-dates__group');
-      if (!group) return;
-      if (e.target.matches('.osp-dates__year')) {
-        if (!e.target.value) return;
-        group.querySelector('.osp-dates__from').value = `${e.target.value}-01`;
-        group.querySelector('.osp-dates__to').value = `${e.target.value}-12`;
-        e.target.value = '';
-      }
-      group.classList.toggle('osp-dates__group--set',
-        Boolean(group.querySelector('.osp-dates__from').value || group.querySelector('.osp-dates__to').value));
-      // Month inputs fire on every typed segment; wait until the user pauses.
-      clearTimeout(dateTimer);
-      dateTimer = setTimeout(applyDates, 600);
+    picker = new DateRangePicker({
+      minYear: FIRST_YEAR,
+      onCommit: (range) => {
+        dateRanges[pickerField] = range;
+        renderDateChips();
+        applyDates();
+      },
     });
+    el.querySelector('.osp-dates').append(picker.el);
 
     el.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -439,6 +439,7 @@
     if (!isListing()) {
       document.documentElement.classList.remove(ACTIVE_CLASS);
       if (playingId) stopPreview();
+      picker?.close(false);
       shown = null;
       return;
     }

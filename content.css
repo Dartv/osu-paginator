@@ -38,10 +38,11 @@ html.osp-active #osp-root {
 /* Date filter */
 
 .osp-dates {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px 16px;
+  gap: 8px;
   margin: 0 0 10px;
   padding: 10px 12px;
   border-radius: 10px;
@@ -49,48 +50,261 @@ html.osp-active #osp-root {
   font-size: 13px;
 }
 
-.osp-dates__group {
+.osp-dates__chip,
+.osp-dates__clear {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-
-.osp-dates__label {
-  min-width: 70px;
-  font-weight: 700;
-  color: hsl(205, 10%, 70%);
-}
-
-.osp-dates__group--set .osp-dates__label {
-  color: hsl(333, 100%, 70%);
-}
-
-.osp-dates input,
-.osp-dates select {
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid hsl(205, 10%, 30%);
-  border-radius: 15px;
-  background: hsl(205, 10%, 12%);
-  color: #fff;
-  font: inherit;
-  color-scheme: dark;
-}
-
-.osp-dates__clear {
-  height: 30px;
-  margin-left: auto;
+  height: 32px;
   padding: 0 12px;
-  border: none;
-  border-radius: 15px;
-  background: hsl(205, 10%, 22%);
+  border: 1px solid hsl(205, 10%, 28%);
+  border-radius: 16px;
+  background: hsl(205, 10%, 12%);
   color: #fff;
   font: inherit;
   cursor: pointer;
 }
 
+.osp-dates__chip:hover,
 .osp-dates__clear:hover {
-  background: hsl(205, 10%, 30%);
+  border-color: hsl(205, 10%, 45%);
+}
+
+.osp-dates__label {
+  font-weight: 700;
+  color: hsl(205, 10%, 70%);
+}
+
+.osp-dates__chip--set {
+  border-color: hsl(333, 100%, 65%);
+}
+
+.osp-dates__chip--set .osp-dates__label {
+  color: hsl(333, 100%, 72%);
+}
+
+.osp-dates__caret {
+  font-size: 10px;
+  color: hsl(205, 10%, 60%);
+}
+
+.osp-dates__clear {
+  margin-left: auto;
+  border-color: transparent;
+  background: hsl(205, 10%, 22%);
+}
+
+/* Date range picker popover */
+
+.osp-picker {
+  position: absolute;
+  z-index: 50;
+  width: 300px;
+  padding: 12px;
+  border: 1px solid hsl(205, 10%, 26%);
+  border-radius: 12px;
+  background: hsl(205, 10%, 11%);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 13px;
+  user-select: none;
+}
+
+.osp-picker[hidden] {
+  display: none;
+}
+
+.osp-picker button,
+.osp-picker select,
+.osp-picker input {
+  font: inherit;
+  color: inherit;
+}
+
+.osp-picker__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.osp-picker__field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  padding: 0 6px 0 10px;
+  border: 1px solid hsl(205, 10%, 28%);
+  border-radius: 8px;
+}
+
+.osp-picker__field--active {
+  border-color: hsl(333, 100%, 65%);
+}
+
+.osp-picker__field span {
+  width: 36px;
+  color: hsl(205, 10%, 60%);
+}
+
+.osp-picker__field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: none;
+  user-select: text;
+}
+
+.osp-picker__input--bad {
+  color: hsl(0, 90%, 70%) !important;
+}
+
+.osp-picker__x {
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: hsl(205, 10%, 60%) !important;
+  font-size: 16px !important;
+  cursor: pointer;
+}
+
+.osp-picker__x:hover {
+  background: hsl(205, 10%, 22%);
+}
+
+.osp-picker__head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.osp-picker__head select {
+  height: 28px;
+  padding: 0 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-weight: 700 !important;
+  font-size: 15px !important;
+  cursor: pointer;
+  color-scheme: dark;
+}
+
+.osp-picker__head select:hover {
+  background: hsl(205, 10%, 20%);
+}
+
+.osp-picker__today {
+  margin-left: auto;
+}
+
+.osp-picker__today,
+.osp-picker__nav,
+.osp-picker__presets button,
+.osp-picker__foot button {
+  height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 6px;
+  background: hsl(205, 10%, 18%);
+  cursor: pointer;
+}
+
+.osp-picker__nav {
+  width: 28px;
+  padding: 0;
+  background: none;
+}
+
+.osp-picker__today:hover,
+.osp-picker__nav:hover,
+.osp-picker__presets button:hover,
+.osp-picker__foot button:hover {
+  background: hsl(205, 10%, 26%);
+}
+
+.osp-picker__weekdays,
+.osp-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+
+.osp-picker__weekdays {
+  margin-bottom: 4px;
+  color: hsl(205, 10%, 60%);
+  font-size: 12px;
+}
+
+.osp-picker__day {
+  position: relative;
+  height: 34px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+}
+
+.osp-picker__day:hover {
+  background: hsl(205, 10%, 24%);
+}
+
+.osp-picker__day--outside {
+  color: hsl(205, 10%, 45%) !important;
+}
+
+.osp-picker__day--today::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: hsl(333, 100%, 65%);
+}
+
+.osp-picker__day--range {
+  background: hsl(205, 10%, 24%);
+}
+
+.osp-picker__day--edge,
+.osp-picker__day--edge:hover {
+  background: hsl(333, 100%, 60%);
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+.osp-picker__day--edge::after {
+  background: #fff;
+}
+
+.osp-picker__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.osp-picker__presets button {
+  font-size: 12px !important;
+}
+
+.osp-picker__foot {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.osp-picker__done {
+  background: hsl(333, 100%, 60%) !important;
+  font-weight: 700 !important;
 }
 
 .osp-notice {
