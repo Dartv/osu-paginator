@@ -3,6 +3,11 @@ html.osp-active .beatmapsets {
   display: none !important;
 }
 
+/* osu! pins a copy of the search panel under the nav bar once you scroll past it. */
+html.osp-active .js-pinned-header-sticky {
+  display: none !important;
+}
+
 #osp-root {
   display: none;
   box-sizing: border-box;
